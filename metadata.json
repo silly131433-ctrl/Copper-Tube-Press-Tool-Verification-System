@@ -1,0 +1,6 @@
+{
+  "name": "精密比對雙效系統",
+  "description": "二合一精密尺寸公差比對的最佳利器，同時支援壓棒比對系統與銅管比對系統（Smart Match Pro），支援一鍵導入 Excel、物理配合 Gap 量測算法。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
