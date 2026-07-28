@@ -5,7 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: './',
+    base: process.env.GITHUB_ACTIONS ? '/Copper-Tube-Press-Tool-Verification-System/' : './',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
