@@ -226,9 +226,9 @@ export default function RulesExplanation() {
                           </div>
                           <div><strong>第二步 (徑向限制)：</strong> 
                             <div className="pl-4 text-[10px] text-slate-700 font-sans leading-relaxed">
-                              若第一階孔內徑 &gt; 0：<strong>(FLANGE 直徑 - 0.1) &le; 第一階孔內徑 &lt; FLANGE 直徑</strong>
+                              若第一階孔內徑 &gt; 0：<strong>小徑直徑 &le; 第一階孔內徑 &lt; FLANGE 直徑</strong>
                               <br />
-                              若無第一階孔（內徑=0）：<strong>(FLANGE 直徑 - 0.1) &le; 管材內徑 &lt; FLANGE 直徑</strong>
+                              若無第一階孔（內徑=0）：<strong>小徑直徑 &le; 管材內徑 &lt; FLANGE 直徑</strong>
                             </div>
                           </div>
                         </div>
@@ -263,13 +263,13 @@ export default function RulesExplanation() {
 
                       <div className="text-xs font-bold text-slate-800 mb-2">當 FLANGE 長度 &lt; 0.08：</div>
                       <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100 text-[11px] text-amber-800 leading-relaxed">
-                        ⚠️ 此情況下，第一階內徑與深度改為自適應（在主畫面輸出為0或自適應標記），直接依據<strong>「孔內徑必須在 [FLANGE 直徑 - 0.1, FLANGE 直徑) 之間」</strong>物理限制以及表面倒角角度進行精準過濾。
+                        ⚠️ 此情況下，第一階內徑與深度改為自適應（在主畫面輸出為0或自適應標記），直接依據<strong>「孔內徑/管材內徑必須在 [小徑直徑, FLANGE 直徑) 之間」</strong>物理限制以及表面倒角角度進行精準過濾。
                       </div>
                     </div>
                     <div className="mt-4 bg-slate-900 text-white p-3 rounded-xl text-[10px] leading-relaxed">
                       💡 <strong>系統公式演變備註：</strong>
                       <br />
-                      第一階孔內徑區間下限已從原先的 <code>FLANGE直徑 - 0.03</code> 修正為 <strong><code>FLANGE直徑 - 0.1</code></strong> 以符合最新精密度生產需求。
+                      孔內徑區間下限已更新為以 <strong><code>小徑直徑</code></strong> 為基準（小徑直徑 &le; 孔內徑/管材內徑 &lt; FLANGE 直徑）。
                     </div>
                   </div>
                 </div>

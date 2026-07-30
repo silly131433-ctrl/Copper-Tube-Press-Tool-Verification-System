@@ -189,9 +189,9 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
             if (!(dbAngSurf >= 30 && dbAngSurf <= 179)) ok = false;
           }
 
-          // 第二步：確認 (FLANGE直徑-0.1) <= 第一階孔內徑 < FLANGE直徑，若無 (即第一階孔內徑＝0) 則再確認 (FLANGE直徑-0.1) <= 管材內徑 < FLANGE直徑
+          // 第二步：確認 小徑直徑 <= 第一階孔內徑 < FLANGE直徑，若無 (即第一階孔內徑＝0) 則再確認 小徑直徑 <= 管材內徑 < FLANGE直徑
           let step2Ok = false;
-          const lowerBound = round3(fDia - 0.1);
+          const lowerBound = round3(dia);
           const upperBound = fDia;
 
           if (dbID1 > 0) {
