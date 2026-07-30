@@ -141,7 +141,8 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
 
     const checkRowMatch = (row: any, allowedPds: string[]) => {
       const pd = String(row['PD分類'] || '').trim().toUpperCase();
-      if (!allowedPds.includes(pd)) return false;
+      // 若圖面有填寫 PD分類，則判斷是否符合當前允許的 PD 種類；若圖面未帶 PD分類（如自訂上傳 Excel），則依幾何尺寸進行彈性比對
+      if (pd && allowedPds.length > 0 && !allowedPds.includes(pd)) return false;
 
       const getVal = (primary: string, secondary: string) => {
         if (row[primary] !== undefined) return valOf(row[primary]);
@@ -162,7 +163,7 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
       let ok = true;
 
       if (form.headType === '長頭型') {
-        if (!isClose(dbAngSurf, tpAng)) ok = false;
+        if (dbAngSurf > 0 && !isClose(dbAngSurf, tpAng)) ok = false;
         const tMin = (dia + diaPos) + gapMin;
         const tMax = (dia + diaNeg) + gapMax;
         const tubeMatch = isClose(tMin, dbTube - dbTubeN) && isClose(tMax, dbTube + dbTubeP);
@@ -179,14 +180,22 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
           const tMax = (fDia + fDiaNeg) + gapMax;
           if (!isClose(tMin, dbID1 - dbID1N) || !isClose(tMax, dbID1 + dbID1P)) ok = false;
 
-          // 第三步：確認第一階孔角度 = TP角度
-          if (!isClose(dbAng1, tpAng)) ok = false;
+          // 第三步：當 TP 角度 ≥ 30° 時：表面倒角角度 = TP 角度；當 TP 角度 < 30° 時：表面倒角角度必須在 30° 至 179° 區間
+          if (dbAngSurf > 0) {
+            if (tpAng >= 30) {
+              if (!isClose(dbAngSurf, tpAng)) ok = false;
+            } else {
+              if (!(dbAngSurf >= 30 && dbAngSurf <= 179)) ok = false;
+            }
+          }
         } else {
-          // 第一步：確認表面倒角角度 = TP角度，但如果TP角度 < 30度則挑選表面導角角度30~179
-          if (tpAng >= 30) {
-            if (!isClose(dbAngSurf, tpAng)) ok = false;
-          } else {
-            if (!(dbAngSurf >= 30 && dbAngSurf <= 179)) ok = false;
+          // 第一步：若有填寫表面倒角角度，確認表面倒角角度 = TP角度（若TP角度 < 30度則允許30~179度）
+          if (dbAngSurf > 0) {
+            if (tpAng >= 30) {
+              if (!isClose(dbAngSurf, tpAng)) ok = false;
+            } else {
+              if (!(dbAngSurf >= 30 && dbAngSurf <= 179)) ok = false;
+            }
           }
 
           // 第二步：確認 小徑直徑 <= 第一階孔內徑 < FLANGE直徑，若無 (即第一階孔內徑＝0) 則再確認 小徑直徑 <= 管材內徑 < FLANGE直徑
@@ -206,7 +215,7 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
           if (!step2Ok) ok = false;
         }
       } else if (form.headType === '鳳梨頭') {
-        if (!isClose(dbAng1, 180)) ok = false;
+        if (dbAng1 > 0 && !isClose(dbAng1, 180)) ok = false;
         const tMin = (fDia + fDiaPos) + gapMin;
         const tMax = (fDia + fDiaNeg) + gapMax;
         if (!isClose(tMin, dbID1 - dbID1N) || !isClose(tMax, dbID1 + dbID1P)) ok = false;

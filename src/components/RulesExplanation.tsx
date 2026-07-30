@@ -206,7 +206,13 @@ export default function RulesExplanation() {
                               tMax = (FLANGE直徑 + FLANGE負公差) + GAP 最大值 == 第一階孔內徑 + 第一階孔內徑正公差
                             </div>
                           </div>
-                          <div><strong>第三步 (角度)：</strong> 第一階孔角度 == TP 角度</div>
+                          <div><strong>第三步 (角度)：</strong>
+                            <div className="pl-4 text-slate-500 text-[10px]">
+                              當 TP 角度 &ge; 30° 時：表面倒角角度 == TP 角度
+                              <br />
+                              當 TP 角度 &lt; 30° 時：表面倒角角度必須在 30° 至 179° 區間
+                            </div>
+                          </div>
                         </div>
                       </div>
 
