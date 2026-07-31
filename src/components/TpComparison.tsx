@@ -180,16 +180,19 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
           const tMax = (fDia + fDiaNeg) + gapMax;
           if (!isClose(tMin, dbID1 - dbID1N) || !isClose(tMax, dbID1 + dbID1P)) ok = false;
 
-          // 第三步：當 TP 角度 ≥ 30° 時：表面倒角角度 = TP 角度；當 TP 角度 < 30° 時：表面倒角角度必須在 30° 至 179° 區間
-          if (dbAngSurf > 0) {
+          // 第三步：當 TP 角度 ≥ 30° 時：第一階孔角度 = TP 角度；當 TP 角度 < 30° 時：第一階孔角度必須在 30° 至 179° 區間
+          // 其中，角度比對時若治具角度為「未填寫 / 空白」(dbAng1 <= 0)，不可視為通用規格（無特定角度限制）
+          if (!dbAng1 || dbAng1 <= 0) {
+            ok = false;
+          } else {
             if (tpAng >= 30) {
-              if (!isClose(dbAngSurf, tpAng)) ok = false;
+              if (!isClose(dbAng1, tpAng)) ok = false;
             } else {
-              if (!(dbAngSurf >= 30 && dbAngSurf <= 179)) ok = false;
+              if (!(dbAng1 >= 30 && dbAng1 <= 179)) ok = false;
             }
           }
         } else {
-          // 第一步：若有填寫表面倒角角度，確認表面倒角角度 = TP角度（若TP角度 < 30度則允許30~179度）
+          // 第一步：若有填寫表面倒角角度，確認表面倒角角度 = TP角度（若TP角度 < 30度則允許30~179度）；若為「未填寫 / 空白」(dbAngSurf <= 0)，可列入通過比對結果
           if (dbAngSurf > 0) {
             if (tpAng >= 30) {
               if (!isClose(dbAngSurf, tpAng)) ok = false;
@@ -346,8 +349,9 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
                 />
               </div>
               <div>
-                <label className="text-xs font-black text-slate-500 mb-2 block uppercase tracking-wider">
-                  GAP 設定
+                <label className="text-xs font-black text-slate-500 mb-2 block uppercase tracking-wider flex items-center justify-between">
+                  <span>GAP 設定</span>
+                  <span className="text-[11px] font-normal text-blue-600 normal-case">(GAP標準:0.02~0.04)</span>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -404,6 +408,11 @@ export default function TpComparison({ fixtures, headers }: TpComparisonProps) {
                     className="h-11 text-center border-2 border-slate-200 rounded-xl text-rose-600 font-mono focus:border-blue-500 focus:outline-none transition-all"
                   />
                 </div>
+                {(form.headType === '短頭型' || form.headType === '鳳梨頭') && (
+                  <p className="text-[11px] font-bold text-amber-600 mt-1.5 flex items-center gap-1">
+                    <span>⚠️</span> 小徑直徑請輸入兩尖端尺寸。
+                  </p>
+                )}
               </div>
 
               <div>

@@ -208,9 +208,10 @@ export default function RulesExplanation() {
                           </div>
                           <div><strong>第三步 (角度)：</strong>
                             <div className="pl-4 text-slate-500 text-[10px]">
-                              當 TP 角度 &ge; 30° 時：表面倒角角度 == TP 角度
+                              當 TP 角度 &ge; 30° 時：第一階孔角度 == TP 角度
                               <br />
-                              當 TP 角度 &lt; 30° 時：表面倒角角度必須在 30° 至 179° 區間
+                              當 TP 角度 &lt; 30° 時：第一階孔角度必須在 30° 至 179° 區間
+                              <span className="block text-rose-500 font-sans mt-0.5">※ 治具角度為未填寫/空白時，不可視為通用規格。</span>
                             </div>
                           </div>
                         </div>
@@ -228,6 +229,7 @@ export default function RulesExplanation() {
                               當 TP 角度 &ge; 30° 時：表面倒角角度 == TP 角度
                               <br />
                               當 TP 角度 &lt; 30° 時：表面倒角角度必須在 30° 至 179° 區間
+                              <span className="block text-emerald-600 font-sans mt-0.5">※ 治具角度為未填寫/空白時，可列入通過比對結果。</span>
                             </div>
                           </div>
                           <div><strong>第二步 (徑向限制)：</strong> 
