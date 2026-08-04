@@ -198,7 +198,7 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
           if (tubeVal <= 0) return false;
           const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
           const tubeID = round3(tubeVal - tubeIDN);
-          return tubeID >= baMax && tubeID < baMin;
+          return tubeID >= bpMax && tubeID < baMin;
         });
       }
     }
