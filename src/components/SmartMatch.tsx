@@ -161,16 +161,20 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
     if (ba.hasFlange) {
       // 1. 首選匹配（第二階孔內徑比對）：baMax ≤ secID < flangeBPCheckLeft
       finalResults = candidateMatches.filter((row) => {
+        const secVal = valOf(row['第二階孔內徑']);
+        if (secVal <= 0) return false;
         const secIDN = Math.abs(getVal(row, '第二階孔內徑負公差', '第二階孔內徑公差(-)'));
-        const secID = round3(valOf(row['第二階孔內徑']) - secIDN);
+        const secID = round3(secVal - secIDN);
         return secID >= baMax && secID < flangeBPCheckLeft;
       });
 
       // 2. 備用匹配（若首選無治具改比對管材內徑）：baMax ≤ tubeID < flangeBPCheckLeft
       if (finalResults.length === 0) {
         finalResults = candidateMatches.filter((row) => {
+          const tubeVal = valOf(row['管材內徑']);
+          if (tubeVal <= 0) return false;
           const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
-          const tubeID = round3(valOf(row['管材內徑']) - tubeIDN);
+          const tubeID = round3(tubeVal - tubeIDN);
           return tubeID >= baMax && tubeID < flangeBPCheckLeft;
         });
       }
@@ -180,17 +184,21 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
     if (finalResults.length === 0) {
       // 1. 首選匹配（第二階孔內徑比對）：bpMax ≤ secID < baMin
       finalResults = candidateMatches.filter((row) => {
+        const secVal = valOf(row['第二階孔內徑']);
+        if (secVal <= 0) return false;
         const secIDN = Math.abs(getVal(row, '第二階孔內徑負公差', '第二階孔內徑公差(-)'));
-        const secID = round3(valOf(row['第二階孔內徑']) - secIDN);
+        const secID = round3(secVal - secIDN);
         return secID >= bpMax && secID < baMin;
       });
 
       // 2. 備用匹配（若首選無治具改比對管材內徑）：bpMax ≤ tubeID < baMin
       if (finalResults.length === 0) {
         finalResults = candidateMatches.filter((row) => {
+          const tubeVal = valOf(row['管材內徑']);
+          if (tubeVal <= 0) return false;
           const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
-          const tubeID = round3(valOf(row['管材內徑']) - tubeIDN);
-          return tubeID >= bpMax && tubeID < baMin;
+          const tubeID = round3(tubeVal - tubeIDN);
+          return tubeID >= baMax && tubeID < baMin;
         });
       }
     }
