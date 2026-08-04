@@ -74,7 +74,8 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
     const baMax = round3(bDia + Math.abs(bUpper));
     const baMin = round3(bDia + bLower);
     const bpMax = round3(valOf(ba.bpDia) + Math.abs(valOf(ba.bpDiaUpper)) + gMin);
-    const flangeBPCheckLeft = round3(valOf(ba.flangeDia) + Math.abs(valOf(ba.flangeDiaLower)) + gMin);
+    const flangeLowerMargin = valOf(ba.flangeDiaLower) <= 0 ? valOf(ba.flangeDiaLower) : -valOf(ba.flangeDiaLower);
+    const flangeBPCheckLeft = round3(valOf(ba.flangeDia) + flangeLowerMargin + gMin);
 
     let f1L = 0;
     let f1U = 0;
@@ -132,7 +133,8 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
     const baMax = round3(valOf(ba.dia) + Math.abs(valOf(ba.diaUpper)));
     const baMin = round3(valOf(ba.dia) + valOf(ba.diaLower));
     const bpMax = round3(valOf(ba.bpDia) + Math.abs(valOf(ba.bpDiaUpper)) + gMin);
-    const flangeBPCheckLeft = round3(valOf(ba.flangeDia) + Math.abs(valOf(ba.flangeDiaLower)) + gMin);
+    const flangeLowerMargin = valOf(ba.flangeDiaLower) <= 0 ? valOf(ba.flangeDiaLower) : -valOf(ba.flangeDiaLower);
+    const flangeBPCheckLeft = round3(valOf(ba.flangeDia) + flangeLowerMargin + gMin);
 
     const getVal = (row: any, primary: string, secondary: string) => {
       if (row[primary] !== undefined) return valOf(row[primary]);
@@ -156,52 +158,42 @@ export default function SmartMatch({ fixtures, headers }: SmartMatchProps) {
       return !isNaN(depth) && depth >= dMin && depth <= dMax;
     });
 
-    let finalResults: FixtureRow[] = [];
+    const finalResults = candidateMatches.filter((row) => {
+      const secVal = valOf(row['第二階孔內徑']);
+      const tubeVal = valOf(row['管材內徑']);
 
-    if (ba.hasFlange) {
-      // 1. 首選匹配（第二階孔內徑比對）：baMax ≤ secID < flangeBPCheckLeft
-      finalResults = candidateMatches.filter((row) => {
-        const secVal = valOf(row['第二階孔內徑']);
-        if (secVal <= 0) return false;
+      let valToCheck = 0;
+      let isSecID = false;
+
+      // 1. 首選：第二階孔內徑 (secID)；備用（若無第二階孔）：管材內徑 (tubeID)
+      if (secVal > 0) {
         const secIDN = Math.abs(getVal(row, '第二階孔內徑負公差', '第二階孔內徑公差(-)'));
-        const secID = round3(secVal - secIDN);
-        return secID >= baMax && secID < flangeBPCheckLeft;
-      });
-
-      // 2. 備用匹配（若首選無治具改比對管材內徑）：baMax ≤ tubeID < flangeBPCheckLeft
-      if (finalResults.length === 0) {
-        finalResults = candidateMatches.filter((row) => {
-          const tubeVal = valOf(row['管材內徑']);
-          if (tubeVal <= 0) return false;
-          const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
-          const tubeID = round3(tubeVal - tubeIDN);
-          return tubeID >= baMax && tubeID < flangeBPCheckLeft;
-        });
+        valToCheck = round3(secVal - secIDN);
+        isSecID = true;
+      } else if (tubeVal > 0) {
+        const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
+        valToCheck = round3(tubeVal - tubeIDN);
+        isSecID = false;
+      } else {
+        return false;
       }
-    }
 
-    // 若選擇無 FLANGE，或是選擇有 FLANGE 但上述兩種匹配方式均未找到治具（若是沒找到則改用）：
-    if (finalResults.length === 0) {
-      // 1. 首選匹配（第二階孔內徑比對）：bpMax ≤ secID < baMin
-      finalResults = candidateMatches.filter((row) => {
-        const secVal = valOf(row['第二階孔內徑']);
-        if (secVal <= 0) return false;
-        const secIDN = Math.abs(getVal(row, '第二階孔內徑負公差', '第二階孔內徑公差(-)'));
-        const secID = round3(secVal - secIDN);
-        return secID >= bpMax && secID < baMin;
-      });
-
-      // 2. 備用匹配（若首選無治具改比對管材內徑）：bpMax ≤ tubeID < baMin
-      if (finalResults.length === 0) {
-        finalResults = candidateMatches.filter((row) => {
-          const tubeVal = valOf(row['管材內徑']);
-          if (tubeVal <= 0) return false;
-          const tubeIDN = Math.abs(getVal(row, '管材內徑負公差', '管材內徑公差(-)'));
-          const tubeID = round3(tubeVal - tubeIDN);
-          return tubeID >= bpMax && tubeID < baMin;
-        });
+      // 2. 防卡死區段比對
+      if (ba.hasFlange) {
+        // FLANGE 模式首選/備用區段：baMax ≤ valToCheck < flangeBPCheckLeft
+        if (valToCheck >= baMax && valToCheck < flangeBPCheckLeft) {
+          return true;
+        }
+        // 若 FLANGE 區段未滿足，自動降級退回 BP~BA 區段比對：bpMax ≤ valToCheck < baMin
+        if (valToCheck >= bpMax && valToCheck < baMin) {
+          return true;
+        }
+        return false;
+      } else {
+        // 無 FLANGE 模式：bpMax ≤ valToCheck < baMin
+        return valToCheck >= bpMax && valToCheck < baMin;
       }
-    }
+    });
 
     const matchedIndices = finalResults.map((f) => f._idx);
     setSearchResults(matchedIndices);
